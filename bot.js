@@ -8,11 +8,11 @@ const config = require('./config.json');
 const SERVICES = [
   { label: 'Hub',          port: 3000 },
   { label: 'Calico SFTP',  port: 3001 },
-  { label: 'Ticketing',    port: 3005 },
   { label: 'Games',        port: 3003 },
+  { label: 'Kitkat Board', port: 3004 },
+  { label: 'Ticketing',    port: 3005 },
   { label: 'Dev Tools',    port: 3006 },
   { label: 'Karaoke',      port: 3007 },
-  { label: 'Kitkat Board', port: 3004 },
 ];
 
 const client = new Client({
@@ -63,9 +63,9 @@ async function postDailyStatus() {
 function isDenverMidnight() {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Denver',
-    hour: 'numeric', minute: 'numeric', hour12: false,
+    hour: 'numeric', minute: 'numeric', hourCycle: 'h23',
   }).formatToParts(new Date());
-  const hour   = parseInt(parts.find(p => p.type === 'hour').value);
+  const hour   = parseInt(parts.find(p => p.type === 'hour').value) % 24;
   const minute = parseInt(parts.find(p => p.type === 'minute').value);
   return hour === 0 && minute === 0;
 }
@@ -83,16 +83,7 @@ client.on('messageCreate', async message => {
     return;
   }
 
-  // if (text.includes('test')) {  // paused
-  //   await message.reply('Running all tests…');
-  //   exec('bash -l ~/apps/hub/run-tests.sh', { env: { ...process.env, HOME: process.env.HOME } },
-  //     (err, stdout) => {
-  //       const result = (stdout && stdout.trim()) || (err ? `❌ Test runner error: \`${err.message}\`` : '(no output)');
-  //       message.channel.send(result.slice(0, 1900)).catch(e => console.error('Failed to post results:', e.message));
-  //     }
-  //   );
-  //   return;
-  // }
+  await message.reply('Here\'s what I can do:\n• `@bot check` — post a live service status report');
 });
 
 // ── Startup ────────────────────────────────────────────────────────────────────
