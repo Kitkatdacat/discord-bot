@@ -6,11 +6,13 @@ const { exec } = require('child_process');
 const config = require('./config.json');
 
 const SERVICES = [
-  { label: 'Hub',         port: 3000 },
-  { label: 'Calico SFTP', port: 3001 },
-  { label: 'Ticketing',   port: 3005 },
-  { label: 'Games',       port: 3003 },
-  { label: 'Dev Tools',   port: 3006 },
+  { label: 'Hub',          port: 3000 },
+  { label: 'Calico SFTP',  port: 3001 },
+  { label: 'Ticketing',    port: 3005 },
+  { label: 'Games',        port: 3003 },
+  { label: 'Dev Tools',    port: 3006 },
+  { label: 'Karaoke',      port: 3007 },
+  { label: 'Kitkat Board', port: 3004 },
 ];
 
 const client = new Client({
