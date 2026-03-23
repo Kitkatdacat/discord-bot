@@ -83,7 +83,7 @@ client.on('messageCreate', async message => {
     return;
   }
 
-  await message.reply('Here\'s what I can do:\n• `@bot check` — post a live service status report');
+  await message.reply("Here's what I can do:\n\u2022 `@bot check` \u2014 post a live service status report");
 });
 
 // ── Startup ────────────────────────────────────────────────────────────────────
