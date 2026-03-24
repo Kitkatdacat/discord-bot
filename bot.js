@@ -60,14 +60,24 @@ async function postDailyStatus() {
   }
 }
 
-function isDenverMidnight() {
+function msTillDenverMidnight() {
+  const now = new Date();
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Denver',
-    hour: 'numeric', minute: 'numeric', hourCycle: 'h23',
-  }).formatToParts(new Date());
-  const hour   = parseInt(parts.find(p => p.type === 'hour').value) % 24;
-  const minute = parseInt(parts.find(p => p.type === 'minute').value);
-  return hour === 0 && minute === 0;
+    hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23',
+  }).formatToParts(now);
+  const h = parseInt(parts.find(p => p.type === 'hour').value);
+  const m = parseInt(parts.find(p => p.type === 'minute').value);
+  const s = parseInt(parts.find(p => p.type === 'second').value);
+  const msElapsedToday = ((h * 60 + m) * 60 + s) * 1000 + (now.getTime() % 1000);
+  return 24 * 60 * 60 * 1000 - msElapsedToday;
+}
+
+function scheduleMidnightPost() {
+  setTimeout(() => {
+    postDailyStatus();
+    scheduleMidnightPost();
+  }, msTillDenverMidnight());
 }
 
 // ── On-demand check ────────────────────────────────────────────────────────────
@@ -94,24 +104,8 @@ client.once('clientReady', () => {
   // Test post on startup
   setTimeout(postDailyStatus, 3000);
 
-  // Scheduled midnight Denver post + nightly tests
-  let lastPostDate = null;
-  setInterval(() => {
-    if (!isDenverMidnight()) return;
-    const today = new Date().toDateString();
-    if (lastPostDate === today) return;
-    lastPostDate = today;
-    postDailyStatus();
-    // exec('bash -l ~/apps/hub/run-tests.sh', { env: { ...process.env, HOME: process.env.HOME } },  // paused
-    //   async (err, stdout) => {
-    //     const result = (stdout && stdout.trim()) || (err ? `❌ Test runner error: \`${err.message}\`` : '(no output)');
-    //     try {
-    //       const channel = await client.channels.fetch(config.channelId);
-    //       await channel.send(result.slice(0, 1900));
-    //     } catch (e) { console.error('Failed to post test results:', e.message); }
-    //   }
-    // );
-  }, 60000);
+  // Schedule daily midnight Denver post
+  scheduleMidnightPost();
 });
 
 client.login(config.token);
