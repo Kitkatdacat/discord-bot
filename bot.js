@@ -60,24 +60,16 @@ async function postDailyStatus() {
   }
 }
 
-function msTillDenverMidnight() {
-  const now = new Date();
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/Denver',
-    hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23',
-  }).formatToParts(now);
-  const h = parseInt(parts.find(p => p.type === 'hour').value);
-  const m = parseInt(parts.find(p => p.type === 'minute').value);
-  const s = parseInt(parts.find(p => p.type === 'second').value);
-  const msElapsedToday = ((h * 60 + m) * 60 + s) * 1000 + (now.getTime() % 1000);
-  return 24 * 60 * 60 * 1000 - msElapsedToday;
-}
-
 function scheduleMidnightPost() {
-  setTimeout(() => {
-    postDailyStatus();
-    scheduleMidnightPost();
-  }, msTillDenverMidnight());
+  setInterval(() => {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Denver',
+      hour: 'numeric', minute: 'numeric', hourCycle: 'h23',
+    }).formatToParts(new Date());
+    const h = parseInt(parts.find(p => p.type === 'hour').value);
+    const m = parseInt(parts.find(p => p.type === 'minute').value);
+    if (h === 0 && m === 0) postDailyStatus();
+  }, 60_000);
 }
 
 // ── On-demand check ────────────────────────────────────────────────────────────
