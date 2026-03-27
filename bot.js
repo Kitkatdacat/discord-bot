@@ -60,16 +60,29 @@ async function postDailyStatus() {
   }
 }
 
-function scheduleMidnightPost() {
-  setInterval(() => {
-    const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/Denver',
-      hour: 'numeric', minute: 'numeric', hourCycle: 'h23',
-    }).formatToParts(new Date());
-    const h = parseInt(parts.find(p => p.type === 'hour').value);
-    const m = parseInt(parts.find(p => p.type === 'minute').value);
-    if (h === 0 && m === 0) postDailyStatus();
-  }, 60_000);
+function msToDenverHour(targetHour) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Denver',
+    hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23',
+  }).formatToParts(new Date());
+  const h = parseInt(parts.find(p => p.type === 'hour').value);
+  const m = parseInt(parts.find(p => p.type === 'minute').value);
+  const s = parseInt(parts.find(p => p.type === 'second').value);
+  const elapsedMs = (h * 3600 + m * 60 + s) * 1000;
+  const targetMs  = targetHour * 3600 * 1000;
+  const dayMs     = 24 * 60 * 60 * 1000;
+  return ((targetMs - elapsedMs) + dayMs) % dayMs;
+}
+
+const DAILY_POST_HOUR = 18; // TEST: 6pm Denver — change to 0 for midnight
+
+function scheduleDailyPost() {
+  const delay = msToDenverHour(DAILY_POST_HOUR);
+  console.log(`Next status post in ${Math.round(delay / 60000)} minutes`);
+  setTimeout(() => {
+    postDailyStatus();
+    setInterval(postDailyStatus, 24 * 60 * 60 * 1000);
+  }, delay);
 }
 
 // ── On-demand check ────────────────────────────────────────────────────────────
@@ -96,8 +109,8 @@ client.once('clientReady', () => {
   // Test post on startup
   setTimeout(postDailyStatus, 3000);
 
-  // Schedule daily midnight Denver post
-  scheduleMidnightPost();
+  // Schedule daily post
+  scheduleDailyPost();
 });
 
 client.login(config.token);
