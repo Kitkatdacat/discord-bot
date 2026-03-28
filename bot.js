@@ -74,7 +74,7 @@ function msToDenverHour(targetHour) {
   return ((targetMs - elapsedMs) + dayMs) % dayMs;
 }
 
-const DAILY_POST_HOUR = 19; // TEST: 7pm Denver — change to 0 for midnight
+const DAILY_POST_HOUR = 0; // midnight Denver
 
 function scheduleDailyPost() {
   const delay = msToDenverHour(DAILY_POST_HOUR);
