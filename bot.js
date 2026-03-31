@@ -13,6 +13,7 @@ const SERVICES = [
   { label: 'Ticketing',    port: 3005 },
   { label: 'Dev Tools',    port: 3006 },
   { label: 'Karaoke',      port: 3007 },
+  { label: 'Trivia',       port: 3008 },
 ];
 
 const client = new Client({
